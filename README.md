@@ -1,6 +1,6 @@
 # ✨ Full Stack Realtime Chat App 🚀  
 
-🌟 **Live Demo**: [ChatApp](https://chatapp-ylss.onrender.com/login)  
+🌟 **Live Demo**: [ChatApp](https://chatapp-ylss.onrender.com/)  
 
 ## 📌 **Overview**  
 A **real-time chat application** built using the **MERN stack**, **Socket.io**, and modern UI libraries like **TailwindCSS** and **Daisy UI**. It supports user authentication, real-time messaging, and online status tracking.  
