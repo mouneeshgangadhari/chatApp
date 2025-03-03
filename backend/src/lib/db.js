@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export const connectDB = async () => {
-  const MONGODB_URI="mongodb+srv://gangadharimouneesh:mouneesh@cluster0.h0mmm.mongodb.net/chat_db?retryWrites=true&w=majority&appName=Cluster0";
+  const MONGODB_URI="mongodb+srv://<UserName>:<Password>@cluster0.h0mmm.mongodb.net/chat_db";
 
   try {
     const conn = await mongoose.connect(MONGODB_URI);
