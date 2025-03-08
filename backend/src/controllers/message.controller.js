@@ -41,32 +41,42 @@ export const sendMessage = async (req, res) => {
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
-    let imageUrl;
-   if (image) {
-  try {
-    console.log("Uploading image to Cloudinary...");
-    const uploadResponse = await cloudinary.uploader.upload(image, {
-      folder: "messages", // Organizes uploads
-      allowed_formats: ["jpg", "png", "webp"], // Ensures only valid formats
-    });
-    console.log("Cloudinary Upload Response:", uploadResponse);
-    imageUrl = uploadResponse.secure_url;
-  } catch (error) {
-    console.error("Cloudinary Upload Error:", error);
-    return res.status(500).json({ error: error.message || "Image upload failed" });
-  }
-}
+    // Ensure at least text or image is provided
+    if (!text && !image) {
+      return res.status(400).json({ error: "Message must contain text or an image" });
+    }
 
+    let imageUrl = null;
 
+    // Upload image if present
+    if (image) {
+      try {
+        console.log("Uploading image to Cloudinary...");
+        const uploadResponse = await cloudinary.uploader.upload(image, {
+          folder: "messages",
+          allowed_formats: ["jpg", "png", "webp"],
+          transformation: [{ width: 800, height: 800, crop: "limit" }], // Resizes image
+        });
+        console.log("Cloudinary Upload Response:", uploadResponse);
+        imageUrl = uploadResponse.secure_url;
+      } catch (error) {
+        console.error("Cloudinary Upload Error:", error);
+        return res.status(500).json({ error: "Image upload failed. Try again later." });
+      }
+    }
+
+    // Create message instance
     const newMessage = new Message({
       senderId,
       receiverId,
-      text,
+      text: text?.trim() || null, // Store text only if it's not empty
       image: imageUrl,
     });
 
+    // Save the message
     await newMessage.save();
 
+    // Emit message via WebSocket if receiver is online
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", newMessage);
@@ -74,7 +84,7 @@ export const sendMessage = async (req, res) => {
 
     res.status(201).json(newMessage);
   } catch (error) {
-    console.log("Error in sendMessage controller: ", error.message);
+    console.error("Error in sendMessage controller:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
